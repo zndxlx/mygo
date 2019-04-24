@@ -1,0 +1,407 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: myEarAdmin api
+  description: myEarAdmin 接口文档
+schemes:
+  - http
+host: 127.0.0.1:8080
+basePath: /admin
+consumes: 
+  - application/json
+produces:
+  - application/json
+
+securityDefinitions: 
+    TokenAuth:
+      type: apiKey
+      name: API-KEY
+      in: header
+    NoAuth:
+      type: 'basic'
+      description: 不用校验的接口，比如登陆接口选择此安全选项
+security:
+  - TokenAuth: [] 
+paths:
+  /login:
+    post:
+      summary: 登陆
+      description: 管理员登陆 
+      security:
+        - NoAuth: []
+      tags:
+        - 登陆
+      parameters:
+        - name: Manager
+          in: body
+          description: 管理员信息
+          required: true
+          schema:
+            required: 
+              - managerName
+              - managerPwd
+            properties:
+              managerName:
+                type: string
+                description: 管理员账号
+              managerPwd:
+                type: string
+                description: 管理员密码
+      responses:
+        200:
+          description: 登陆成功,返回的账号信息
+          schema:
+            required:
+              - code
+            properties:
+              code:
+                type: integer
+                description: 返回码, 0:成功;1:账号不存在;2:密码错误; 
+              msg:
+                type: string
+                description: 返回码描述
+              data:
+                  properties:
+                    token:
+                      type: string
+                      description: 登陆成功服务器返回token,后续其它接口需要使用它鉴权
+                    role:
+                      type: integer
+                      description: 1、普通管理员 2、超级管理员
+  /logout:
+    post:
+      summary: 退出登陆
+      description: 管理员退出登陆
+      tags:
+        - 登陆
+      responses:
+        200:
+          description: 退出登陆结果
+          schema:
+            required:
+              - code
+            properties:
+              code:
+                type: integer
+                description: 返回码,0 成功
+              msg:
+                type: string
+                description: 返回码描述
+
+  /managers:
+    get:
+      summary: 获取管理员列表
+      description: 获取管理员列表，服务器会一次返回所有数据，客户端端自己完成分页和排序
+      tags:
+        - 管理员管理
+      responses:
+        200:
+          description: 获取管理员列表响应
+          schema:
+            required:
+              - code
+            properties:
+              code:
+                type: integer
+                description: 返回码,0 成功; 
+              msg:
+                type: string
+                description: 返回码描述
+              data:
+                properties:
+                  managers:
+                    $ref: "defines.yaml#/Managers"
+
+    post:
+      summary: 创建管理员
+      description: 创建管理员
+      tags:
+        - 管理员管理
+      parameters:
+        - name: Manager
+          in: body
+          description: 管理员信息
+          schema:
+            properties:
+              name:
+                type: string
+                description: 管理员名称
+              pass:
+                type: string
+                description: 管理员密码的
+              email:
+                type: string
+                description: 邮箱地址
+              phone:
+                type: string
+                description: 手机号
+              role:
+                type: integer
+                description: 1、普通管理员 2、超级管理员
+      responses:
+        200:
+          description: 创建管理员结果
+          schema:
+            required:
+              - code
+            properties:
+              code:
+                type: integer
+                description: 返回码 0 成功
+              msg:
+                type: string
+                description: 返回码描述
+
+    delete:
+      summary: 删除管理员
+      description: 删除管理员
+      tags:
+        - 管理员管理
+      parameters:
+        - name: ids
+          in: query
+          description: 需要删除的管理员id列表，逗号分隔
+          type: array
+          collectionFormat: csv
+          minItems: 1
+          items:
+            type: integer
+      responses:
+        200:
+          description: 删除管理员成功
+          schema:
+            properties:  
+              code:
+                type: integer
+                description: 返回码 0 成功
+              msg:
+                type: string
+                description: 返回码描述
+              data:
+                properties:
+                  num:
+                    type: integer
+                    description: 成功删除的记录数
+
+  /managers/{id}:
+    get:
+      summary: 获取管理员信息
+      description: 获取管理员列表
+      tags:
+        - 管理员管理
+      parameters:
+        - name: id
+          in: path
+          description: 管理员的id
+          required: true
+          type: integer
+      responses:
+        200:
+          description: 获取管理员列表响应
+          schema:
+            required:
+              - code
+            properties:
+              code:
+                type: integer
+                description: 返回码,0 成功; 
+              msg:
+                type: string
+                description: 返回码描述
+              data:
+                properties:
+                  manager:
+                    $ref: "defines.yaml#/Manager"
+
+    post:
+      summary: 修改管理员信息
+      description: 修改管理员信息
+      tags:
+        - 管理员管理
+      parameters:
+        - name: id
+          in: path
+          description: 管理员的id
+          required: true
+          type: integer
+        - name: 管理员信息
+          in: body
+          schema:
+            required: 
+              - pass
+              - email
+              - phone
+              - role
+            properties:    
+              pass:
+                type: string
+                description: 管理员密码
+              email:
+                type: string
+                description: 邮箱地址
+              phone:
+                type: string
+                description: 手机号
+              role:
+                type: integer
+                description: 1、普通管理员 2、超级管理员
+      responses:
+        200:
+          description: 修改管理员结果
+          schema:
+            required:
+              - code
+            properties:
+              code:
+                type: integer
+                description: 返回码 0 成功
+              msg:
+                type: string
+                description: 返回码描述
+
+  /users:
+    get:
+      summary: 获取用户员列表
+      description: 获取用户列表，服务器需要处理分页和排序
+      tags:
+        - 用户管理
+      parameters:
+        - name: page
+          in: query
+          description: 查询页码
+          type: integer
+        - name: pagesize
+          in: query
+          description: 每页数据大小 
+          type: integer
+        - name: sort
+          in: query
+          description: 排序字段, +标识升序,-标识降序
+          type: array
+          collectionFormat: csv
+          items:
+            type: string
+            pattern: '[-+](username|lastTimeOnline|firstname|lastname)'
+      responses:
+        200:
+          description: 获取用户列表成功
+          schema:
+            properties:
+              users:
+                $ref: "defines.yaml#/Users"
+              total:
+                description: 总数
+        500:
+          description: 获取用户失败,支持的错误码 1:请求参数错误; 
+          schema:
+            $ref: "defines.yaml#/Error"
+
+    post:
+      summary: 创建一个用户
+      description: 创建一个用户
+      tags:
+        - 用户管理
+      parameters:
+        - name: user
+          in: body
+          description: 用户信息
+          schema:
+            properties:
+              name:
+                type: string
+                description: 用户名
+              pwd:
+                type: string
+                description: 用户密码的 MD5值
+              device:
+                type: string
+                description: 设备硬件标识
+              phone:
+                type: string
+                description: 手机号
+      responses:
+        200:
+          description: 创建用户成功 返回uid
+        500:
+          description: 创建用户失败,支持的错误码 1:用户名冲突;
+          schema:
+            $ref: "defines.yaml#/Error"
+    delete:
+      summary: 删除用户
+      description: 删除用户
+      tags:
+        - 用户管理
+      parameters:
+        - name: ids
+          in: query
+          description: 用户id列表,逗号分隔
+          collectionFormat: csv
+          type: array
+          items:
+            type: integer
+      responses:
+        200:
+          description: 删除用户成功
+          schema:
+            properties:  
+              num:
+                type: integer
+                description: 成功删除的记录数
+        500:
+          description: 删除用户失败;
+          schema:
+            $ref: "defines.yaml#/Error"
+
+  /users/{uid}:
+    get:
+      summary: 查询用户信息
+      description: 查询用户信息
+      tags:
+        - 用户管理
+      parameters:
+        - name: uid
+          in: path
+          description: 用户的id
+          required: true
+          type: integer
+      responses:
+        200:
+          description: 查询用户信息成功
+          schema:
+              $ref: "defines.yaml#/User"
+        500:
+          description: 查询用户信息失败,支持的错误码 1:id不存在; 
+          schema:
+            $ref: "defines.yaml#/Error"
+
+    post:
+      summary: 修改用户信息
+      description: 修改用户信息
+      tags:
+        - 用户管理
+      parameters:
+        - name: uid
+          in: path
+          description: 用户的id
+          required: true
+          type: integer
+        - name: 用户信息
+          in: body
+          schema:
+            properties:    
+              pwd:
+                type: string
+                description: 用户密码的 MD5值
+              phone:
+                type: string
+                description: 手机号
+              device:
+                type: string
+                description: 设备硬件标识
+      responses:
+        200:
+          description: 修改用户信息成功
+        500:
+          description: 修改用户信息失败,支持的错误码 1:用户不存在;
+          schema:
+            $ref: "defines.yaml#/Error"

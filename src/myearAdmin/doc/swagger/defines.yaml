@@ -1,0 +1,75 @@
+Error:
+  required:
+    - code
+  properties:
+    code:
+      type: integer
+      description: 错误码
+    message:
+      type: string
+      description: 错误码描述,通用错误码范围10000-99999,  10000:服务器错误 10001:token过期 10002:没有权限
+
+Manager:
+  required:
+    - name
+    - pwd
+    - role
+    - id
+  properties:
+    id:
+      type: integer
+      description: 管理员标识
+    name:
+      type: string
+      description: 管理员名称
+    pass:
+      type: string
+      description: 管理员密码的
+    email:
+      type: string
+      description: 邮箱地址
+    phone:
+      type: string
+      description: 手机号
+    role:
+      type: integer
+      description: 1、普通管理员 2、超级管理员
+    createTime:
+      type: integer
+      description: 创建时间
+
+Managers:
+  type: array
+  items:
+    $ref: "#/Manager"
+
+
+User:
+  required:
+    - name
+    - pwd
+    - uid
+  properties:
+    uid:
+      type: integer
+      description: 用户标识
+    name:
+      type: string
+      description: 用户名
+    pwd:
+      type: string
+      description: 用户密码的 MD5值
+    device:
+      type: string
+      description: 设备硬件标识
+    phone:
+      type: string
+      description: 手机号
+    createTime:
+      type: integer
+      description: 创建时间
+
+Users:
+  type: array
+  items:
+    $ref: "#/User"    
